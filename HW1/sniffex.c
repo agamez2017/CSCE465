@@ -502,12 +502,36 @@ return;
 
 int main(int argc, char **argv)
 {
-
+	char fileName[100];
+	char input[10];
+	const char* yes = "y";
+	printf("Reading from an offline file? (y for yes and n for no)\n");
+	scanf("%s",input);
+	if( strcmp(input,yes) == 0 )
+	{
+		printf("Please enter file name: \n");
+		scanf("%s",fileName);
+		pcap_t *descr;
+		char errbuf[PCAP_ERRBUF_SIZE];
+		descr = pcap_open_offline(fileName,errbuf);
+		if(descr == NULL){
+			fprintf(stderr, "Couldn't open file %s: %s\n", fileName, errbuf);
+		exit(EXIT_FAILURE);
+		}
+		if(pcap_loop(descr,0,got_packet,NULL) < 0){
+			fprintf(stderr, "FAILURE at pcap_loop(): %s\n", errbuf);
+		exit(EXIT_FAILURE);
+		}
+		printf("Capture complete");
+		return 0;
+	}
+	else
+	{
 	char *dev = NULL;			/* capture device name */
 	char errbuf[PCAP_ERRBUF_SIZE];		/* error buffer */
 	pcap_t *handle;				/* packet capture handle */
 
-	char filter_exp[] = "tcp port 23";		/* filter expression [3] */
+	char filter_exp[] = "ip";		/* filter expression [3] */
 	struct bpf_program fp;			/* compiled filter program (expression) */
 	bpf_u_int32 mask;			/* subnet mask */
 	bpf_u_int32 net;			/* ip */
@@ -583,5 +607,7 @@ int main(int argc, char **argv)
 
 	printf("\nCapture complete.\n");
 
-return 0;
+	return 0;
+
+	}
 }
